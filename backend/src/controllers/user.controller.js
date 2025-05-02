@@ -96,7 +96,18 @@ export const loginUser = async (req, res) => {
 
     const token = generateToken(findUser._id);
 
-    return res.status(200).json({ success: true, token });
+    const options = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      path: "/",
+      expires: expiryDate,
+    };
+
+    return res
+      .status(200)
+      .cookie("userToken", token, options)
+      .json({ success: true, token });
   } catch (error) {
     console.log(error);
     return res
