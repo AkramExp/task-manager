@@ -65,6 +65,7 @@ export const deleteTask = async (req, res) => {
 
 export const updateTask = async (req, res) => {
   try {
+    const userId = req.userId;
     const { taskId } = req.params;
     const { title, description, dueDate, priority, status, assignedTo } =
       req.body;
@@ -73,6 +74,20 @@ export const updateTask = async (req, res) => {
       return res
         .status(400)
         .json({ success: false, message: "Task title is required" });
+    }
+
+    const findTask = await Task.findById(taskId);
+
+    if (!findTask) {
+      return res.json(404).json({ success: false, message: "Task not found" });
+    }
+
+    if (String(findTask.createdBy) !== userId) {
+      console.log(findTask.createdBy, userId);
+
+      return res
+        .status(403)
+        .json({ success: false, message: "Unauthorized Access" });
     }
 
     await Task.findByIdAndUpdate(taskId, {
