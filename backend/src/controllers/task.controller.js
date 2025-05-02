@@ -108,3 +108,31 @@ export const updateTask = async (req, res) => {
       .json({ success: false, message: "Internal Server Error" });
   }
 };
+
+export const getUserTasks = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const tasks = await Task.find({ createdBy: userId });
+
+    return res.status(200).json({ success: true, data: tasks });
+  } catch (error) {
+    return res
+      .json(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const getAssignedTask = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const tasks = await Task.find({ assignedTo: userId });
+
+    return res.status(200).json({ success: true, data: tasks });
+  } catch (error) {
+    return res
+      .json(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
