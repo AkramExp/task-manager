@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import connectDB from "./db/index.js";
 import userRouter from "./routes/user.routes.js";
 import taskRouter from "./routes/task.routes.js";
+import notificationRouter from "./routes/notification.routes.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/user", userRouter);
 app.use("/api/task", taskRouter);
+app.use("/api/notification", notificationRouter);
 
 app.get("/", (req, res) => {
   res.send("Api Working");
