@@ -96,6 +96,8 @@ export const loginUser = async (req, res) => {
 
     const token = generateToken(findUser._id);
 
+    const expiryDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+
     const options = {
       httpOnly: true,
       secure: true,
@@ -108,6 +110,51 @@ export const loginUser = async (req, res) => {
       .status(200)
       .cookie("userToken", token, options)
       .json({ success: true, token });
+  } catch (error) {
+    console.log(error);
+    return res
+      .json(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const logoutUser = async (req, res) => {
+  try {
+    const expiryDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      path: "/",
+      expires: expiryDate,
+    };
+
+    return res
+      .status(200)
+      .clearCookie("userToken", options)
+      .json({ success: true, message: "User logged out" });
+  } catch (error) {
+    console.log(error);
+    return res
+      .json(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({ success: true, data: user });
   } catch (error) {
     console.log(error);
     return res
