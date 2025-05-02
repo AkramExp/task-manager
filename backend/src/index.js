@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import connectDB from "./db/index.js";
 import userRouter from "./routes/user.routes.js";
+import taskRouter from "./routes/task.routes.js";
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/user", userRouter);
+app.use("/api/task", taskRouter);
 
 app.get("/", (req, res) => {
   res.send("Api Working");
