@@ -12,11 +12,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { SigninValidation } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
+import { BACKEND_URL } from "../../../../config";
+import { useRouter } from "next/navigation";
 
 const SignIn = () => {
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
     defaultValues: {
@@ -25,7 +31,21 @@ const SignIn = () => {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof SigninValidation>) {}
+  async function onSubmit(values: z.infer<typeof SigninValidation>) {
+    try {
+      const response = await axios.post(`${BACKEND_URL}/user/login`, values);
+
+      toast.success("Logged in successfully");
+      localStorage.setItem("userToken", response.data.token);
+
+      router.push("/");
+    } catch (error: any) {
+      toast.error(
+        error.response.data.message ||
+          "Something went wrong while login, Please try again later"
+      );
+    }
+  }
 
   return (
     <div className="flex flex-col items-center bg-white rounded-md p-6 shadow-md gap-3 max-w-md w-full mx-4">
