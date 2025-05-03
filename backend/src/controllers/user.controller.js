@@ -162,3 +162,16 @@ export const getCurrentUser = async (req, res) => {
       .json({ success: false, message: "Internal Server Error" });
   }
 };
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+
+    return res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    console.log(error);
+    return res
+      .json(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};

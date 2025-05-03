@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  getAllUsers,
   getCurrentUser,
   loginUser,
   logoutUser,
@@ -10,6 +11,8 @@ import verifyUser from "../middlewares/verifyUser.js";
 const userRouter = Router();
 
 userRouter.get("/current", verifyUser, getCurrentUser);
+
+userRouter.get("/list-all", getAllUsers);
 
 userRouter.post("/register", registerUser);
 
