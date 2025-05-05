@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Task } from "../models/task.model.js";
 
 export const createTask = async (req, res) => {
@@ -114,7 +115,41 @@ export const getUserTasks = async (req, res) => {
   try {
     const userId = req.userId;
 
-    const tasks = await Task.find({ createdBy: userId });
+    const tasks = await Task.aggregate([
+      {
+        $match: { createdBy: new mongoose.Types.ObjectId(userId) },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "createdBy",
+          foreignField: "_id",
+          as: "createdBy",
+        },
+      },
+      {
+        $addFields: {
+          createdBy: {
+            $first: "$createdBy",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "assignedTo",
+          foreignField: "_id",
+          as: "assignedTo",
+        },
+      },
+      {
+        $addFields: {
+          assignedTo: {
+            $first: "$assignedTo",
+          },
+        },
+      },
+    ]);
 
     return res.status(200).json({ success: true, data: tasks });
   } catch (error) {
