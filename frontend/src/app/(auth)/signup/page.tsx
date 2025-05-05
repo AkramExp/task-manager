@@ -18,8 +18,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 import axios from "axios";
 import { BACKEND_URL } from "../../../../config";
-import { log } from "node:console";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 const SignUp = () => {
   const router = useRouter();
@@ -36,10 +36,12 @@ const SignUp = () => {
   async function onSubmit(values: z.infer<typeof SignupValidation>) {
     try {
       const response = await axios.post(`${BACKEND_URL}/user/register`, values);
-
-      toast.success("Registered successfully");
-      localStorage.setItem("userToken", response.data.token);
-      router.push("/");
+      if (response.data.success) {
+        toast.success("Registered successfully");
+        localStorage.setItem("userToken", response.data.token);
+        Cookies.set("userToken", response.data.token);
+        router.push("/");
+      }
     } catch (error: any) {
       toast.error(
         error.response.data.message ||
@@ -49,98 +51,95 @@ const SignUp = () => {
   }
 
   return (
-    <div className="flex flex-col items-center bg-white rounded-md p-6 shadow-md gap-3 max-w-md w-full mx-4">
-      <h2 className="h2-bold text-center text-blue-500">Create your account</h2>
-      <p className="text-center mb-4 text-blue-400">
-        Sign up to use task manager
-      </p>
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-3"
-        >
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <div className="shadcn-form-row">
-                  <FormLabel className="shadcn-form-label text-blue-500 text-lg font-[600]">
-                    Name
-                  </FormLabel>
+    <div className="w-full min-h-screen flex items-center justify-center bg-gray-900 p-4">
+      <div className="min-w-[25rem] bg-gray-800 rounded-xl p-8 border border-gray-700 shadow-lg">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            Create your account
+          </h2>
+          <p className="text-gray-400 mt-2">Sign up to use Task Manager</p>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-300">Name</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter your name"
                       {...field}
                       type="text"
-                      className="form-input rounded-lg border-[1px] border-blue-300 bg-blue-100/30 max-w-4xl placeholder:text-zinc-700 text-zinc-900"
+                      className="bg-gray-700 border-gray-600 text-gray-100 placeholder:text-gray-400 focus-visible:ring-blue-500"
                     />
                   </FormControl>
-                </div>
-                <FormMessage className="text-start" />
-              </FormItem>
-            )}
-          />
+                  <FormMessage className="text-red-400" />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <div className="shadcn-form-row">
-                  <FormLabel className="shadcn-form-label text-blue-500 text-lg font-[600]">
-                    Email
-                  </FormLabel>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-300">Email</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter your email"
                       {...field}
                       type="email"
-                      className="form-input rounded-lg border-[1px] border-blue-300 bg-blue-100/30 max-w-4xl placeholder:text-zinc-700 text-zinc-900"
+                      className="bg-gray-700 border-gray-600 text-gray-100 placeholder:text-gray-400 focus-visible:ring-blue-500"
                     />
                   </FormControl>
-                </div>
-                <FormMessage className="text-start" />
-              </FormItem>
-            )}
-          />
+                  <FormMessage className="text-red-400" />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <div className="shadcn-form-row">
-                  <FormLabel className="shadcn-form-label text-blue-500 text-lg font-[600]">
-                    Password
-                  </FormLabel>
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-300">Password</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter your password"
                       {...field}
-                      className="form-input rounded-lg border-[1px] border-blue-300 bg-blue-100/30 max-w-4xl placeholder:text-zinc-700 text-zinc-900"
                       type="password"
+                      className="bg-gray-700 border-gray-600 text-gray-100 placeholder:text-gray-400 focus-visible:ring-blue-500"
                     />
                   </FormControl>
-                </div>
-                <FormMessage className="text-start" />
-              </FormItem>
-            )}
-          />
-          <p className="text-center text-sm font-medium">
-            Already have an account?{" "}
-            <Link href="/auth/signin" className="text-blue-600">
-              Sign in
-            </Link>
-          </p>
-          <Button
-            type="submit"
-            className="cursor-pointer mt-3 text-lg font-[500] bg-[#027efe] hover:bg-blue-500/90"
+                  <FormMessage className="text-red-400" />
+                </FormItem>
+              )}
+            />
+
+            <div className="pt-2">
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors cursor-pointer"
+              >
+                Register
+              </Button>
+            </div>
+          </form>
+        </Form>
+
+        <p className="text-center text-gray-400 mt-4 text-sm">
+          Already have an account?{" "}
+          <Link
+            href="/signin"
+            className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
           >
-            Register
-          </Button>
-        </form>
-      </Form>
+            Sign in
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };
