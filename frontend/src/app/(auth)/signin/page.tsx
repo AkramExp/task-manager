@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { BACKEND_URL } from "../../../../config";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 const SignIn = () => {
   const router = useRouter();
@@ -37,6 +38,8 @@ const SignIn = () => {
 
       toast.success("Logged in successfully");
       localStorage.setItem("userToken", response.data.token);
+
+      Cookies.set("userToken", response.data.token, { expires: 7, path: "/" });
 
       router.push("/");
     } catch (error: any) {
