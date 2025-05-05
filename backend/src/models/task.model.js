@@ -7,7 +7,7 @@ const taskSchema = new Schema(
     dueDate: { type: Date },
     priority: {
       type: String,
-      enum: ["Low", "Medium", "high"],
+      enum: ["Low", "Medium", "High"],
       default: "Medium",
     },
     status: {
