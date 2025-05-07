@@ -57,7 +57,7 @@ const TaskCard = ({ task }: TaskCardProps) => {
                     : "N/A"}
                 </span>
               ) : (
-                <span>
+                <span className="font-bold text-[15px]">
                   {task.dueDate ? formatDateTime(task.dueDate).dateOnly : "N/A"}
                 </span>
               )}
