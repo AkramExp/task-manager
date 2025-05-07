@@ -39,8 +39,8 @@ const LogoutButton = () => {
       className="bg-red-700 flex items-center py-[6px] px-2 rounded-md hover:bg-red-600 cursor-pointer font-semibold"
       onClick={handleLogout}
     >
-      <LogOut className="w-6 h-6 mr-2" />
-      Logout
+      <LogOut className="w-6 h-6 sm:mr-2" />
+      <p className="hidden sm:block">Logout</p>
     </button>
   );
 };
