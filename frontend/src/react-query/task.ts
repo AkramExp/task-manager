@@ -15,8 +15,7 @@ export function useTasks() {
   const { data: allTasks, isLoading } = useQuery({
     queryFn: async () => {
       const query = searchParams.get("query") || "";
-
-      // const page = searchParams.get("page") || "1";
+      const page = searchParams.get("page") || "1";
       const taskType = searchParams.get("taskType") || "all";
       const status = searchParams.get("status") || "all";
       const priority = searchParams.get("priority") || "all";
@@ -27,10 +26,10 @@ export function useTasks() {
         const response = await axios.get(`${BACKEND_URL}/task/created`, {
           withCredentials: true,
           headers: { Authorization: `Bearer ${token}` },
-          params: { taskType, status, priority, overdue, sort, query },
+          params: { taskType, status, priority, overdue, sort, query, page },
         });
 
-        const tasks = response.data.data;
+        const tasks = response.data;
 
         return tasks;
       } catch (error: any) {
