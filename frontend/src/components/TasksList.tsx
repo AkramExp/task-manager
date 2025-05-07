@@ -1,12 +1,20 @@
 "use client";
 
 import { useTasks } from "@/react-query/task";
-import { SearchX } from "lucide-react";
+import { Loader, SearchX } from "lucide-react";
 import TaskCard from "./TaskCard";
 import Pagination from "./Pagination";
 
 const TasksList = () => {
   const { allTasks, isLoading } = useTasks();
+
+  if (isLoading)
+    return (
+      <div className="flex flex-col gap-3 items-center justify-center h-[10rem] text-xl font-semibold">
+        <Loader className="animate-spin h-10 w-10" />
+        Loading Tasks
+      </div>
+    );
 
   return (
     <>
