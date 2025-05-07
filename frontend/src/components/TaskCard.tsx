@@ -27,8 +27,8 @@ const TaskCard = ({ task }: TaskCardProps) => {
   const { currentUser } = useCurrentUser();
 
   const assignedTo =
-    task.assignedTo._id === currentUser?._id &&
-    task.assignedTo._id !== task.createdBy._id;
+    task.assignedTo?._id === currentUser?._id &&
+    task.assignedTo?._id !== task.createdBy._id;
 
   return (
     <>
