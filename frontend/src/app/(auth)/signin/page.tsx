@@ -38,14 +38,14 @@ const SignIn = () => {
 
       if (response.data.success) {
         toast.success("Logged in successfully");
-        localStorage.setItem("userToken", response.data.token);
 
+        localStorage.setItem("userToken", response.data.token);
         Cookies.set("userToken", response.data.token, {
           expires: 7,
           path: "/",
         });
 
-        router.push("/");
+        router.push("/dashboard");
       }
     } catch (error: any) {
       toast.error(

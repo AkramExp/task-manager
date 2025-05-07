@@ -38,9 +38,14 @@ const SignUp = () => {
       const response = await axios.post(`${BACKEND_URL}/user/register`, values);
       if (response.data.success) {
         toast.success("Registered successfully");
+
         localStorage.setItem("userToken", response.data.token);
-        Cookies.set("userToken", response.data.token);
-        router.push("/");
+        Cookies.set("userToken", response.data.token, {
+          expires: 7,
+          path: "/",
+        });
+
+        router.push("/dashboard");
       }
     } catch (error: any) {
       toast.error(
