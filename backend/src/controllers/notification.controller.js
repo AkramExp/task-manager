@@ -66,7 +66,9 @@ export const getNotifications = async (req, res) => {
   try {
     const userId = req.userId;
 
-    const notifications = await Notification.find({ userId });
+    const notifications = await Notification.find({ userId }).sort({
+      createdAt: -1,
+    });
 
     return res.status(200).json({ success: true, data: notifications });
   } catch (error) {
