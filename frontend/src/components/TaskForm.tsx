@@ -17,15 +17,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { TaskValidation } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, ChevronLeft, ChevronsUpDown } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Textarea } from "./ui/textarea";
+import { useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { ChevronsUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { BACKEND_URL } from "../../config";
 import {
   Command,
   CommandEmpty,
@@ -33,18 +35,23 @@ import {
   CommandInput,
   CommandItem,
 } from "./ui/command";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import axios from "axios";
-import { BACKEND_URL } from "../../config";
-import { log } from "node:console";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Textarea } from "./ui/textarea";
 
 const statusOptions = ["Todo", "In Progress", "Completed"];
 const priorityOptions = ["Low", "Medium", "High"];
 
-const TaskForm = () => {
-  const router = useRouter();
+const TaskForm = ({
+  type,
+  task,
+  setToggleForm,
+}: {
+  type?: string;
+  task?: any;
+  setToggleForm?: any;
+}) => {
   const [assignedToUsers, setAssignedToUsers] = useState([]);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     async function getUsers() {
@@ -68,242 +75,290 @@ const TaskForm = () => {
   const form = useForm<z.infer<typeof TaskValidation>>({
     resolver: zodResolver(TaskValidation),
     defaultValues: {
-      title: "",
-      description: "",
-      dueDate: undefined,
-      status: "",
-      priority: "",
-      assignedTo: "",
+      title: task?.title || "",
+      description: task?.description || "",
+      dueDate: task?.dueDate ? new Date(task.dueDate) : undefined,
+      status: task?.status || undefined,
+      priority: task?.priority || undefined,
+      assignedTo: task?.assignedTo?._id || "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof TaskValidation>) {
     try {
+      const payload = {
+        ...values,
+        assignedTo: values.assignedTo === "" ? undefined : values.assignedTo,
+      };
       const token = localStorage.getItem("userToken");
 
-      const response = await axios.post(`${BACKEND_URL}/task/create`, values, {
-        withCredentials: true,
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      if (type === "edit") {
+        const response = await axios.put(
+          `${BACKEND_URL}/task/update/${task._id}`,
+          payload,
+          {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-      if (response.data.success) {
-        toast.success(response.data.message);
-        router.push("/");
+        if (response.data.success) {
+          toast.success(response.data.message);
+          queryClient.invalidateQueries({ queryKey: ["all-tasks"] });
+          setToggleForm(false);
+        }
+      } else {
+        const response = await axios.post(
+          `${BACKEND_URL}/task/create`,
+          payload,
+          {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (response.data.success) {
+          toast.success(response.data.message);
+          queryClient.invalidateQueries({ queryKey: ["all-tasks"] });
+          setToggleForm(false);
+        }
       }
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message ||
-          "Something went wrong creating task, Please try again later"
+          `Something went wrong ${
+            type === "edit" ? "editing" : "creating"
+          } task, Please try again later`
       );
     }
   }
-
   return (
-    <div className="h-[80vh] flex items-center justify-center w-full">
-      <div className="relative flex flex-col bg-gradient-to-br from-gray-50 to-gray-100/90 border border-gray-300 rounded-md p-6 shadow-md gap-3 max-w-md w-full">
-        <div className="absolute left-0 -top-[3rem]">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="cursor-pointer"
-          >
-            <ChevronLeft />
-            Back
-          </Button>
-        </div>
-        <h2 className="text-3xl font-semibold text-center mb-6">Add Task</h2>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-3"
-          >
-            {/* Title */}
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-gray-300">Title</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Task Title"
+                  {...field}
+                  required
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-gray-300">Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Task Description"
+                  {...field}
+                  cols={20}
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="dueDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-gray-300">Due Date</FormLabel>
+                <FormControl>
+                  <Input
+                    value={task?.dueDate && new Date(task.dueDate)}
+                    type="date"
+                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-gray-300">Status</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <Input placeholder="Task Title" {...field} required />
+                    <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white">
+                      <SelectValue placeholder="Select Status" />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                    {statusOptions.map((status) => (
+                      <SelectItem
+                        key={status}
+                        value={status}
+                        className="hover:bg-gray-700"
+                      >
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            {/* Description */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
+          <FormField
+            control={form.control}
+            name="priority"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-gray-300">Priority</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <Textarea
-                      placeholder="Task Description"
-                      {...field}
-                      cols={20}
-                    />
+                    <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white">
+                      <SelectValue placeholder="Select Priority" />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              {/* Due Date */}
-              <FormField
-                control={form.control}
-                name="dueDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Due Date</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        onChange={(e) =>
-                          field.onChange(new Date(e.target.value))
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                    {priorityOptions.map((priority) => (
+                      <SelectItem
+                        key={priority}
+                        value={priority}
+                        className="hover:bg-gray-700"
+                      >
+                        {priority}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-              {/* Status */}
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {statusOptions.map((status) => (
-                          <SelectItem key={status} value={status}>
-                            {status}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <FormField
+            control={form.control}
+            name="assignedTo"
+            render={({ field }) => {
+              const [open, setOpen] = useState(false);
 
-              {/* Priority */}
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Priority</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Priority" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {priorityOptions.map((priority) => (
-                          <SelectItem key={priority} value={priority}>
-                            {priority}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              return (
+                <FormItem className="flex flex-col">
+                  <FormLabel className="text-gray-300">Assigned To</FormLabel>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className={cn(
+                          "w-full justify-between bg-gray-700 border-gray-600 text-white",
+                          !field.value && "text-gray-400"
+                        )}
+                      >
+                        {field.value && field.value !== "None"
+                          ? assignedToUsers.find(
+                              (user: any) => user._id === field.value
+                              // @ts-ignore
+                            )?.name
+                          : "Unassigned"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0 bg-gray-800 border-gray-700 text-white">
+                      <Command
+                        className="bg-gray-800"
+                        filter={(value, search) => {
+                          // Custom filter function to search by name and email
+                          const user: any = assignedToUsers.find(
+                            (u: any) => u._id === value
+                          );
+                          if (!user) return 0; // for "None" option
 
-              {/* Assigned To */}
-              <FormField
-                control={form.control}
-                name="assignedTo"
-                render={({ field }) => {
-                  const [open, setOpen] = useState(false);
-
-                  return (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Assigned To</FormLabel>
-                      <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            className={cn(
-                              "w-full justify-between",
-                              !field.value && "text-muted-foreground"
-                            )}
+                          const nameMatch = user.name
+                            .toLowerCase()
+                            .includes(search.toLowerCase());
+                          const emailMatch = user.email
+                            .toLowerCase()
+                            .includes(search.toLowerCase());
+                          return nameMatch || emailMatch ? 1 : 0;
+                        }}
+                      >
+                        <CommandInput
+                          placeholder="Search user..."
+                          className="text-white"
+                        />
+                        <CommandEmpty className="text-white text-center p-2">
+                          No user found
+                        </CommandEmpty>
+                        <CommandGroup className="text-white">
+                          <CommandItem
+                            value="None"
+                            onSelect={() => {
+                              form.setValue("assignedTo", "");
+                              setOpen(false);
+                            }}
+                            className="hover:bg-gray-700 cursor-pointer"
                           >
-                            {field.value && field.value !== "None"
-                              ? assignedToUsers.find(
-                                  (user: any) => user._id === field.value
-                                  // @ts-ignore
-                                )?.name
-                              : "Unassigned"}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full p-0">
-                          <Command>
-                            <CommandInput placeholder="Search user..." />
-                            <CommandEmpty>No user found.</CommandEmpty>
-                            <CommandGroup>
-                              <CommandItem
-                                value=""
-                                onSelect={(val) => {
-                                  form.setValue("assignedTo", "");
-                                  setOpen(false);
-                                }}
+                            None
+                          </CommandItem>
+                          {assignedToUsers.map((user: any) => (
+                            <CommandItem
+                              key={user.email}
+                              value={user._id} // This is what gets stored
+                              onSelect={(val) => {
+                                form.setValue("assignedTo", val);
+                                setOpen(false);
+                              }}
+                              className="hover:bg-gray-700 cursor-pointer text-white"
+                            >
+                              <span
+                                className={cn(
+                                  "flex flex-col w-full rounded-sm p-1",
+                                  field.value === user._id && "bg-gray-600"
+                                )}
                               >
-                                None
-                              </CommandItem>
-                              {assignedToUsers.map((user: any) => (
-                                <CommandItem
-                                  key={user.email}
-                                  value={user._id}
-                                  onSelect={(val) => {
-                                    form.setValue("assignedTo", val);
-                                    setOpen(false);
-                                  }}
-                                >
-                                  <span
-                                    className={cn(
-                                      "flex flex-col w-full rounded-sm p-1",
-                                      field.value === user._id && "bg-red-100"
-                                    )}
-                                  >
-                                    <p>{user.name}</p>
-                                    <p>{user.email}</p>
-                                  </span>
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
-              />
-            </div>
+                                <p className="font-semibold">{user.name}</p>
+                                <p className="text-gray-400">{user.email}</p>
+                              </span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+        </div>
 
-            <Button type="submit" className="mt-3">
-              Submit
-            </Button>
-          </form>
-        </Form>
-      </div>
-    </div>
+        <Button
+          type="submit"
+          className="mt-3 bg-blue-600 hover:bg-blue-700 cursor-pointer"
+        >
+          {type === "edit" ? "Update" : "Create Task"}
+        </Button>
+      </form>
+    </Form>
   );
 };
 
