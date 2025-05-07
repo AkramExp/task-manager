@@ -1,9 +1,11 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 import { Task } from "../models/task.model.js";
 
 export const createTask = async (req, res) => {
   try {
-    const { title, description, dueDate, priority, assignedTo } = req.body;
+    const { title, description, dueDate, priority, status, assignedTo } =
+      req.body;
+
     const userId = req.userId;
 
     if (!title) {
@@ -17,6 +19,7 @@ export const createTask = async (req, res) => {
       description,
       dueDate,
       priority,
+      status,
       assignedTo,
       createdBy: userId,
     });
@@ -83,9 +86,10 @@ export const updateTask = async (req, res) => {
       return res.json(404).json({ success: false, message: "Task not found" });
     }
 
-    if (String(findTask.createdBy) !== userId) {
-      console.log(findTask.createdBy, userId);
-
+    if (
+      String(findTask.createdBy) !== userId &&
+      String(findTask.assignedTo) !== userId
+    ) {
       return res
         .status(403)
         .json({ success: false, message: "Unauthorized Access" });
@@ -113,11 +117,77 @@ export const updateTask = async (req, res) => {
 
 export const getUserTasks = async (req, res) => {
   try {
+    const { taskType, status, priority, overdue, sort, query } = req.query;
     const userId = req.userId;
+
+    const queryCondition = query
+      ? {
+          $or: [
+            {
+              title: { $regex: query, $options: "i" },
+            },
+            {
+              description: { $regex: query, $options: "i" },
+            },
+          ],
+        }
+      : {};
+
+    const taskTypeCondition =
+      taskType && taskType !== "all"
+        ? taskType === "created"
+          ? { createdBy: new mongoose.Types.ObjectId(userId) }
+          : { assignedTo: new mongoose.Types.ObjectId(userId) }
+        : {
+            $or: [
+              { createdBy: new mongoose.Types.ObjectId(userId) },
+              { assignedTo: new mongoose.Types.ObjectId(userId) },
+            ],
+          };
+
+    const statusCondition =
+      status && status !== "all" ? { status: status } : {};
+    const priorityCondition =
+      priority && priority !== "all" ? { priority: priority } : {};
+
+    const overdueCondition =
+      overdue && overdue !== "all"
+        ? overdue === "overdue"
+          ? {
+              dueDate: {
+                $lt: new Date(),
+              },
+            }
+          : {
+              dueDate: {
+                $gt: new Date(),
+              },
+            }
+        : {};
+
+    let sortCondition = {};
+
+    if (sort === "dueDate") {
+      sortCondition = { dueDate: -1 };
+    } else if (sort === "priority") {
+      sortCondition = { priority: -1 };
+    } else if (sort === "status") {
+      sortCondition = { status: 1 };
+    } else {
+      sortCondition = { createdAt: -1 };
+    }
 
     const tasks = await Task.aggregate([
       {
-        $match: { createdBy: new mongoose.Types.ObjectId(userId) },
+        $match: {
+          $and: [
+            taskTypeCondition,
+            priorityCondition,
+            statusCondition,
+            overdueCondition,
+            queryCondition,
+          ],
+        },
       },
       {
         $lookup: {
@@ -148,6 +218,9 @@ export const getUserTasks = async (req, res) => {
             $first: "$assignedTo",
           },
         },
+      },
+      {
+        $sort: sortCondition,
       },
     ]);
 
