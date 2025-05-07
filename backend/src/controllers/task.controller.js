@@ -1,5 +1,7 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
+import { Notification } from "../models/notification.model.js";
 import { Task } from "../models/task.model.js";
+import { User } from "../models/user.model.js";
 
 export const createTask = async (req, res) => {
   try {
@@ -23,6 +25,15 @@ export const createTask = async (req, res) => {
       assignedTo,
       createdBy: userId,
     });
+
+    const user = await User.findById(userId);
+
+    if (assignedTo && assignedTo !== userId) {
+      await Notification.create({
+        userId: assignedTo,
+        message: `${user.name} (${user.email}) has assigned you a task`,
+      });
+    }
 
     return res
       .status(200)
@@ -55,6 +66,13 @@ export const deleteTask = async (req, res) => {
     }
 
     await Task.findByIdAndDelete(findTask._id);
+
+    const taskUser = await User.findById(userId);
+
+    await Notification.create({
+      userId: findTask.assignedTo,
+      message: `${taskUser.name} (${taskUser.email}) has deleted the task "${findTask.title}"`,
+    });
 
     return res
       .status(200)
@@ -95,18 +113,62 @@ export const updateTask = async (req, res) => {
         .json({ success: false, message: "Unauthorized Access" });
     }
 
-    await Task.findByIdAndUpdate(taskId, {
-      title,
-      description,
-      priority,
-      status,
-      dueDate,
-      assignedTo,
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskId,
+      {
+        title,
+        description,
+        priority,
+        status,
+        dueDate,
+        assignedTo,
+      },
+      { new: true }
+    );
+
+    const taskUser = await User.findById(userId);
+
+    await Notification.create({
+      userId: assignedTo,
+      message: `${taskUser.name} (${taskUser.email}) has updated the task "${updatedTask.title}"`,
     });
 
     return res
       .status(200)
       .json({ success: true, message: "Task updated successfully" });
+  } catch (error) {
+    console.log(error);
+    return res
+      .json(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const updateStatus = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { status } = req.body;
+
+    const findTask = await Task.findById(taskId);
+
+    if (!findTask) {
+      return res.json(404).json({ success: false, message: "Task not found" });
+    }
+
+    await Task.findByIdAndUpdate(taskId, {
+      status,
+    });
+
+    const assignedUser = await User.findById(findTask.assignedTo);
+
+    await Notification.create({
+      userId: findTask.createdBy,
+      message: `${assignedUser.name}-${assignedUser.email} has updated the status of the task "${findTask.title}"`,
+    });
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Status updated successfully" });
   } catch (error) {
     console.log(error);
     return res

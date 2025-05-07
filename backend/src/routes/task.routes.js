@@ -5,6 +5,7 @@ import {
   deleteTask,
   getAssignedTask,
   getUserTasks,
+  updateStatus,
   updateTask,
 } from "../controllers/task.controller.js";
 
@@ -17,6 +18,8 @@ taskRouter.get("/assigned", verifyUser, getAssignedTask);
 taskRouter.post("/create", verifyUser, createTask);
 
 taskRouter.put("/update/:taskId", verifyUser, updateTask);
+
+taskRouter.put("/update-status/:taskId", updateStatus);
 
 taskRouter.delete("/delete/:taskId", verifyUser, deleteTask);
 
