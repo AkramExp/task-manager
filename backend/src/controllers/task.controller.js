@@ -117,8 +117,11 @@ export const updateTask = async (req, res) => {
 
 export const getUserTasks = async (req, res) => {
   try {
-    const { taskType, status, priority, overdue, sort, query } = req.query;
+    const { taskType, status, priority, overdue, sort, query, page } =
+      req.query;
     const userId = req.userId;
+    const limit = 8;
+    const skip = (Number(page) - 1) * limit;
 
     const queryCondition = query
       ? {
@@ -172,10 +175,22 @@ export const getUserTasks = async (req, res) => {
     } else if (sort === "priority") {
       sortCondition = { priority: -1 };
     } else if (sort === "status") {
-      sortCondition = { status: 1 };
+      sortCondition = { status: -1 };
     } else {
       sortCondition = { createdAt: -1 };
     }
+
+    const totalTasks = await Task.countDocuments({
+      $and: [
+        taskTypeCondition,
+        priorityCondition,
+        statusCondition,
+        overdueCondition,
+        queryCondition,
+      ],
+    });
+
+    const totalPages = Math.ceil(totalTasks / limit);
 
     const tasks = await Task.aggregate([
       {
@@ -222,9 +237,15 @@ export const getUserTasks = async (req, res) => {
       {
         $sort: sortCondition,
       },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: limit,
+      },
     ]);
 
-    return res.status(200).json({ success: true, data: tasks });
+    return res.status(200).json({ success: true, data: tasks, totalPages });
   } catch (error) {
     console.log(error);
     return res
