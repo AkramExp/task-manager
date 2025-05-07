@@ -1,7 +1,7 @@
-import SearchInput from "@/components/SearchInput";
-import TasksList from "@/components/TasksList";
 import CreateNewTask from "@/components/CreateNewTask";
 import Filters from "@/components/Filters";
+import SearchInput from "@/components/SearchInput";
+import TasksList from "@/components/TasksList";
 
 const Page = () => {
   return (
