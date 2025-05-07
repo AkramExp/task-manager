@@ -25,7 +25,7 @@ const TaskDetail = ({
         </DialogHeader>
         <div className="bg-white p-2 rounded-sm">
           <p className="text-zinc-900 font-semibold text-lg italic">
-            {task.description}
+            {task.description || "*No Description*"}
           </p>
         </div>
       </DialogContent>
