@@ -15,7 +15,7 @@ const Page = () => {
         </div>
       </div>
 
-      <div className="w-full mt-6 px-4">
+      <div className="w-full mt-6 md:px-4">
         <TasksList />
       </div>
     </div>
