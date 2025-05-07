@@ -76,7 +76,6 @@ const Notifications = () => {
       >
         {notifications?.length > 0 ? (
           <>
-            {" "}
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h3 className="font-semibold text-white">Notifications</h3>
             </div>
@@ -85,7 +84,7 @@ const Notifications = () => {
                 (notification: NotificationType, index: number) => (
                   <div
                     key={index}
-                    className={`flex flex-col gap-3 p-4 border-b border-gray-700 transition-colors ${
+                    className={`flex flex-col gap-2 p-4 border-b border-gray-700 transition-colors ${
                       !notification.read ? "bg-blue-900/20" : ""
                     }`}
                   >
