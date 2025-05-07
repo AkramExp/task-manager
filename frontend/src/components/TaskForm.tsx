@@ -136,7 +136,7 @@ const TaskForm = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-4 "
       >
         <FormField
           control={form.control}
@@ -168,7 +168,7 @@ const TaskForm = ({
                   placeholder="Task Description"
                   {...field}
                   cols={20}
-                  className="bg-gray-700 border-gray-600 text-white"
+                  className="bg-gray-700 border-gray-600 text-white overflow-auto max-h-[200px]"
                 />
               </FormControl>
               <FormMessage />

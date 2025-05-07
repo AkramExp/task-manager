@@ -24,7 +24,7 @@ const TaskDetail = ({
             {task.title}
           </DialogTitle>
         </DialogHeader>
-        <div className="bg-white p-2 rounded-sm">
+        <div className="bg-white p-2 rounded-sm max-h-[calc(100vh-200px)] overflow-auto">
           <p className="text-zinc-900 font-[500] text-lg italic">
             {task.description || "*No Description*"}
           </p>
