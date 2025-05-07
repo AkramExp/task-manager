@@ -56,7 +56,7 @@ const UpdateStatusForm = ({
       const token = localStorage.getItem("userToken");
 
       const response = await axios.put(
-        `${BACKEND_URL}/task/update/${task._id}`,
+        `${BACKEND_URL}/task/update-status/${task._id}`,
         payload,
         {
           withCredentials: true,
