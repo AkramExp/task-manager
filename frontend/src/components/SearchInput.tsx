@@ -28,7 +28,7 @@ const SearchInput = () => {
   return (
     <div className="relative w-full px-4 sm:px-8">
       <Input
-        className="form-input rounded-lg border-[1px] border-gray-600 bg-gray-700/60 pl-10 pr-4 sm:px-6 max-w-4xl placeholder:text-gray-400 text-white text-lg w-full"
+        className="form-input rounded-lg border-[1px] border-gray-600 bg-gray-700/60 pl-4 pr-4 sm:px-6 max-w-4xl placeholder:text-gray-400 text-white text-sm sm:text-lg w-full"
         placeholder="Search with Title or Description"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
