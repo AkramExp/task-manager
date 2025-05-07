@@ -1,7 +1,10 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { BACKEND_URL } from "../../config";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,12 +16,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
-import { BACKEND_URL } from "../../config";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 const TaskDeleteConfirmation = ({ taskId }: { taskId: string }) => {
-  const router = useRouter();
+  const queryClient = useQueryClient();
 
   async function deleteTask() {
     try {
@@ -34,7 +34,7 @@ const TaskDeleteConfirmation = ({ taskId }: { taskId: string }) => {
 
       if (response.data.success) {
         toast.success(response.data.message);
-        router.refresh();
+        queryClient.invalidateQueries({ queryKey: ["all-tasks"] });
       }
     } catch (error: any) {
       toast.error(
@@ -47,7 +47,7 @@ const TaskDeleteConfirmation = ({ taskId }: { taskId: string }) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <div className="flex items-center gap-1 text-sm px-3 py-1 rounded-lg bg-red-600 text-white hover:bg-red-500 transition cursor-pointer">
+        <div className="flex items-center gap-1 text-sm px-3 py-1 rounded-lg bg-red-700 text-white hover:bg-red-600 transition cursor-pointer h-full">
           <Trash2 size={16} />
           Delete
         </div>
@@ -69,8 +69,10 @@ const TaskDeleteConfirmation = ({ taskId }: { taskId: string }) => {
           </AlertDialogCancel>
 
           <AlertDialogAction
-            onClick={() => deleteTask()}
-            className="bg-red-600 text-white hover:bg-red-500 px-4 py-2 rounded-lg transition cursor-pointer"
+            onClick={() => {
+              deleteTask();
+            }}
+            className="bg-red-700 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition cursor-pointer"
           >
             Delete
           </AlertDialogAction>
