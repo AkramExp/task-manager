@@ -15,9 +15,10 @@ import TaskDetail from "./TaskDetail";
 import TaskForm from "./TaskForm";
 import { Button } from "./ui/button";
 import UpdateStatusForm from "./UpdateStatusForm";
+import { TaskType } from "@/types";
 
 type TaskCardProps = {
-  task: any;
+  task: TaskType;
 };
 
 const TaskCard = ({ task }: TaskCardProps) => {
@@ -28,7 +29,7 @@ const TaskCard = ({ task }: TaskCardProps) => {
 
   const assignedTo =
     task.assignedTo?._id === currentUser?._id &&
-    task.assignedTo?._id !== task.createdBy._id;
+    task.assignedTo?._id !== task.createdBy?._id;
 
   return (
     <>
@@ -53,12 +54,14 @@ const TaskCard = ({ task }: TaskCardProps) => {
                   }`}
                 >
                   {task.dueDate
-                    ? formatDateTime(task.dueDate).dateOnly + " Overdue!"
+                    ? formatDateTime(task?.dueDate).dateOnly + " Overdue!"
                     : "N/A"}
                 </span>
               ) : (
                 <span className="font-bold text-[15px]">
-                  {task.dueDate ? formatDateTime(task.dueDate).dateOnly : "N/A"}
+                  {task.dueDate
+                    ? formatDateTime(task?.dueDate).dateOnly
+                    : "N/A"}
                 </span>
               )}
             </div>

@@ -1,6 +1,7 @@
 "use client";
 import { timeAgo } from "@/lib/utils";
 import { useNotifications } from "@/react-query/notification";
+import { NotificationType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Bell, Trash } from "lucide-react";
@@ -19,7 +20,7 @@ const Notifications = () => {
   }, [notifications]);
 
   const unreadCount = notifications?.filter(
-    (notification: any) => !notification.read
+    (notification: NotificationType) => !notification.read
   ).length;
 
   async function markNotificationRead(notificationId: string) {
@@ -80,39 +81,43 @@ const Notifications = () => {
               <h3 className="font-semibold text-white">Notifications</h3>
             </div>
             <div className="max-h-96 overflow-y-auto">
-              {allNotifications?.map((notification: any, index: number) => (
-                <div
-                  key={index}
-                  className={`flex flex-col gap-3 p-4 border-b border-gray-700 transition-colors ${
-                    !notification.read ? "bg-blue-900/20" : ""
-                  }`}
-                >
-                  <p className="text-sm sm:text-[15px] text-gray-200">
-                    {notification.message}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-400 mt-2">
-                      {timeAgo(notification.createdAt)}
+              {allNotifications?.map(
+                (notification: NotificationType, index: number) => (
+                  <div
+                    key={index}
+                    className={`flex flex-col gap-3 p-4 border-b border-gray-700 transition-colors ${
+                      !notification.read ? "bg-blue-900/20" : ""
+                    }`}
+                  >
+                    <p className="text-sm sm:text-[15px] text-gray-200">
+                      {notification.message}
                     </p>
-                    <div className="flex items-center gap-3">
-                      {!notification.read && (
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-gray-400 mt-2">
+                        {timeAgo(notification.createdAt)}
+                      </p>
+                      <div className="flex items-center gap-3">
+                        {!notification.read && (
+                          <button
+                            className="text-sm hover:underline"
+                            onClick={() =>
+                              markNotificationRead(notification._id)
+                            }
+                          >
+                            Mark as read
+                          </button>
+                        )}
                         <button
-                          className="text-sm hover:underline"
-                          onClick={() => markNotificationRead(notification._id)}
+                          className="cursor-pointer hover:text-red-700"
+                          onClick={() => deleteNotification(notification._id)}
                         >
-                          Mark as read
+                          <Trash className="w-[18px]" />
                         </button>
-                      )}
-                      <button
-                        className="cursor-pointer hover:text-red-700"
-                        onClick={() => deleteNotification(notification._id)}
-                      >
-                        <Trash className="w-[18px]" />
-                      </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           </>
         ) : (

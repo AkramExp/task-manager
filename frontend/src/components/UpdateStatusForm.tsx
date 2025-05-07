@@ -16,15 +16,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { StatusValidation } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { BACKEND_URL } from "../../config";
-import { StatusValidation } from "@/lib/validation";
+import { TaskType } from "@/types";
 
 const statusOptions = ["Todo", "In Progress", "Completed"];
 
@@ -32,8 +32,8 @@ const UpdateStatusForm = ({
   task,
   setToggleForm,
 }: {
-  task?: any;
-  setToggleForm?: any;
+  task: TaskType;
+  setToggleForm: (value: boolean) => void;
 }) => {
   const queryClient = useQueryClient();
 
@@ -56,7 +56,7 @@ const UpdateStatusForm = ({
       const token = localStorage.getItem("userToken");
 
       const response = await axios.put(
-        `${BACKEND_URL}/task/update-status/${task._id}`,
+        `${BACKEND_URL}/task/update-status/${task?._id}`,
         payload,
         {
           withCredentials: true,
