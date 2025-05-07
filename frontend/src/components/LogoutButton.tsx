@@ -4,10 +4,10 @@ import axios from "axios";
 import { LogOut } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
-import { BACKEND_URL } from "../../../config";
 import { Router } from "next/router";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import { BACKEND_URL } from "../../config";
 
 const LogoutButton = () => {
   const router = useRouter();
@@ -36,7 +36,7 @@ const LogoutButton = () => {
 
   return (
     <button
-      className="bg-red-600 flex items-center py-1 px-2 rounded-md hover:bg-red-500 cursor-pointer"
+      className="bg-red-700 flex items-center py-[6px] px-2 rounded-md hover:bg-red-600 cursor-pointer font-semibold"
       onClick={handleLogout}
     >
       <LogOut className="w-6 h-6 mr-2" />

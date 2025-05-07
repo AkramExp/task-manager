@@ -1,6 +1,6 @@
 import { LogOut } from "lucide-react";
 import Link from "next/link";
-import LogoutButton from "./ui/LogoutButton";
+import LogoutButton from "./LogoutButton";
 
 const Navbar = () => {
   return (
