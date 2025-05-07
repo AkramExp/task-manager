@@ -7,7 +7,6 @@ import Pagination from "./Pagination";
 
 const TasksList = () => {
   const { allTasks, isLoading } = useTasks();
-  console.log(allTasks);
 
   return (
     <>
