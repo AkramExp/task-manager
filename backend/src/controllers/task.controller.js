@@ -16,7 +16,7 @@ export const createTask = async (req, res) => {
         .json({ success: false, message: "Task title is required" });
     }
 
-    await Task.create({
+    const createdTask = await Task.create({
       title,
       description,
       dueDate,
@@ -31,7 +31,7 @@ export const createTask = async (req, res) => {
     if (assignedTo && assignedTo !== userId) {
       await Notification.create({
         userId: assignedTo,
-        message: `${user.name} (${user.email}) has assigned you a task`,
+        message: `${user.name} (${user.email}) has assigned you the task "${createdTask.title}"`,
       });
     }
 
