@@ -76,3 +76,20 @@ export const getNotifications = async (req, res) => {
       .json({ success: false, message: "Internal Server Error" });
   }
 };
+
+export const deleteNotification = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+
+    await Notification.findByIdAndDelete(notificationId);
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Notification deleted" });
+  } catch (error) {
+    console.log(error);
+    return res
+      .json(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
