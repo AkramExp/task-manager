@@ -57,7 +57,7 @@ const SignUp = () => {
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-gray-900 p-4">
-      <div className="min-w-[25rem] bg-gray-800 rounded-xl p-8 border border-gray-700 shadow-lg">
+      <div className="sm:min-w-[25rem] bg-gray-800 rounded-xl p-8 border border-gray-700 shadow-lg">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Create your account
