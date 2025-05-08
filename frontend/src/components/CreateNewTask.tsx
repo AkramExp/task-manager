@@ -10,9 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import TaskForm from "@/components/TaskForm";
 import { Button } from "./ui/button";
+import { useCurrentUser } from "@/react-query/user";
+import { Loader } from "lucide-react";
 
 const CreateNewTask = () => {
   const [toggleForm, setToggleForm] = useState(false);
+  const { currentUser, isLoading } = useCurrentUser();
 
   return (
     <Dialog onOpenChange={setToggleForm} open={toggleForm}>
@@ -28,7 +31,13 @@ const CreateNewTask = () => {
         <DialogHeader>
           <DialogTitle className="text-white mb-4">Create New Task</DialogTitle>
         </DialogHeader>
-        <TaskForm setToggleForm={setToggleForm} />
+        {isLoading ? (
+          <div className="flex flex-col gap-3 items-center justify-center h-[5rem] text-xl font-semibold">
+            <Loader className="animate-spin h-10 w-10" />
+          </div>
+        ) : (
+          <TaskForm setToggleForm={setToggleForm} currentUser={currentUser} />
+        )}
       </DialogContent>
     </Dialog>
   );

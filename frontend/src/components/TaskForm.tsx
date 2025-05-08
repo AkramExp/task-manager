@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { TaskValidation } from "@/lib/validation";
+import { TaskType, UserType } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -45,10 +46,12 @@ const TaskForm = ({
   type,
   task,
   setToggleForm,
+  currentUser,
 }: {
   type?: string;
-  task?: any;
-  setToggleForm?: any;
+  task?: TaskType;
+  setToggleForm: (value: boolean) => void;
+  currentUser: UserType;
 }) => {
   const [assignedToUsers, setAssignedToUsers] = useState([]);
   const queryClient = useQueryClient();
@@ -59,7 +62,11 @@ const TaskForm = ({
         const response = await axios.get(`${BACKEND_URL}/user/list-all`);
 
         if (response.data.success) {
-          setAssignedToUsers(response.data.data);
+          const filter = response.data.data.filter(
+            (item: UserType) => item?._id !== currentUser?._id
+          );
+
+          setAssignedToUsers(filter);
         }
       } catch (error: any) {
         toast.error(
@@ -77,7 +84,7 @@ const TaskForm = ({
     defaultValues: {
       title: task?.title || "",
       description: task?.description || "",
-      dueDate: task?.dueDate ? new Date(task.dueDate) : undefined,
+      dueDate: task?.dueDate ? new Date(task.dueDate) : new Date(),
       status: task?.status || undefined,
       priority: task?.priority || undefined,
       assignedTo: task?.assignedTo?._id || "",
@@ -94,7 +101,7 @@ const TaskForm = ({
 
       if (type === "edit") {
         const response = await axios.put(
-          `${BACKEND_URL}/task/update/${task._id}`,
+          `${BACKEND_URL}/task/update/${task?._id}`,
           payload,
           {
             withCredentials: true,
@@ -185,7 +192,6 @@ const TaskForm = ({
                 <FormLabel className="text-gray-300">Due Date</FormLabel>
                 <FormControl>
                   <Input
-                    value={task?.dueDate && new Date(task.dueDate)}
                     type="date"
                     onChange={(e) => field.onChange(new Date(e.target.value))}
                     className="bg-gray-700 border-gray-600 text-white"

@@ -163,7 +163,12 @@ const TaskCard = ({ task }: TaskCardProps) => {
           <DialogHeader>
             <DialogTitle className="text-white mb-4">Edit Task</DialogTitle>
           </DialogHeader>
-          <TaskForm type="edit" task={task} setToggleForm={setOpenEdit} />
+          <TaskForm
+            type="edit"
+            task={task}
+            setToggleForm={setOpenEdit}
+            currentUser={currentUser}
+          />
         </DialogContent>
       </Dialog>
       <Dialog open={openUpdateStatus} onOpenChange={setOpenUpdateStatus}>
