@@ -175,3 +175,30 @@ export const getAllUsers = async (req, res) => {
       .json({ success: false, message: "Internal Server Error" });
   }
 };
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    const userId = req.userId;
+
+    const findUser = await User.findOne({ email, _id: { $ne: userId } });
+
+    if (findUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User with the email already exists",
+      });
+    }
+
+    await User.findByIdAndUpdate(userId, { name, email });
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Profile updated successfully" });
+  } catch (error) {
+    console.log(error);
+    return res
+      .json(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
