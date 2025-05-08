@@ -2,7 +2,7 @@
 
 TaskFlow is a collaborative task management website designed to help teams efficiently assign, track, and manage tasks. Streamline your workflow and enhance productivity with seamless task delegation and progress monitoring
 
-![s1](https://github.com/AkramExp/forever-ecommerce/blob/main/frontend/public/screenshot.png)
+![s1](https://github.com/AkramExp/task-manager/blob/main/frontend/public/screenshot.png)
 
 #### Live Site : https://task-manager-akramexp.vercel.app
 
