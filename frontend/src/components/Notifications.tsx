@@ -72,7 +72,7 @@ const Notifications = () => {
       </PopoverTrigger>
       <PopoverContent
         className="bg-gray-800 border-gray-700 text-white w-[20rem] sm:min-w-md"
-        align="end"
+        align="center"
       >
         {notifications?.length > 0 ? (
           <>
