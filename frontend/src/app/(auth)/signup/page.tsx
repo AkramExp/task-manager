@@ -11,15 +11,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { SignupValidation } from "@/lib/validation";
+import { useSignup } from "@/react-query/user";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader } from "lucide-react";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
-import axios from "axios";
-import { BACKEND_URL } from "../../../../config";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const SignUp = () => {
   const router = useRouter();
@@ -33,26 +31,10 @@ const SignUp = () => {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof SignupValidation>) {
-    try {
-      const response = await axios.post(`${BACKEND_URL}/user/register`, values);
-      if (response.data.success) {
-        toast.success("Registered successfully");
+  const { signupUser, isPending } = useSignup();
 
-        localStorage.setItem("userToken", response.data.token);
-        Cookies.set("userToken", response.data.token, {
-          expires: 7,
-          path: "/",
-        });
-
-        router.push("/dashboard");
-      }
-    } catch (error: any) {
-      toast.error(
-        error.response.data.message ||
-          "Something went wrong while registering, Please try again later"
-      );
-    }
+  function onSubmit(values: z.infer<typeof SignupValidation>) {
+    signupUser(values);
   }
 
   return (
@@ -129,7 +111,13 @@ const SignUp = () => {
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors cursor-pointer"
               >
-                Register
+                {isPending ? (
+                  <div className="flex items-center gap-2 font-semibold">
+                    Registering <Loader className="animate-spin h-10 w-10" />
+                  </div>
+                ) : (
+                  "Register"
+                )}
               </Button>
             </div>
           </form>

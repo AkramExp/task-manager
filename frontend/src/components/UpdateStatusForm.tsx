@@ -17,14 +17,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatusValidation } from "@/lib/validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
-import { BACKEND_URL } from "../../config";
+import { useUpdateTaskStatus } from "@/react-query/task";
 import { TaskType } from "@/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const statusOptions = ["Todo", "In Progress", "Completed"];
 
@@ -35,8 +33,6 @@ const UpdateStatusForm = ({
   task: TaskType;
   setToggleForm: (value: boolean) => void;
 }) => {
-  const queryClient = useQueryClient();
-
   const form = useForm<z.infer<typeof StatusValidation>>({
     resolver: zodResolver(StatusValidation),
     defaultValues: {
@@ -44,38 +40,20 @@ const UpdateStatusForm = ({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof StatusValidation>) {
-    try {
-      console.log(values);
+  const { updateStatus, isPending } = useUpdateTaskStatus(
+    task?._id,
+    setToggleForm
+  );
 
-      const payload = {
-        ...task,
-        status: values.status,
-      };
+  function onSubmit(values: z.infer<typeof StatusValidation>) {
+    const payload = {
+      ...task,
+      status: values.status,
+    };
 
-      const token = localStorage.getItem("userToken");
-
-      const response = await axios.put(
-        `${BACKEND_URL}/task/update-status/${task?._id}`,
-        payload,
-        {
-          withCredentials: true,
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.data.success) {
-        toast.success(response.data.message);
-        queryClient.invalidateQueries({ queryKey: ["all-tasks"] });
-        setToggleForm(false);
-      }
-    } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message ||
-          "Something went wrong updating status, Please try again later"
-      );
-    }
+    updateStatus(payload);
   }
+
   return (
     <Form {...form}>
       <form
@@ -115,7 +93,13 @@ const UpdateStatusForm = ({
           type="submit"
           className="mt-3 bg-blue-600 hover:bg-blue-700 cursor-pointer"
         >
-          Update
+          {isPending ? (
+            <div className="flex items-center gap-2 font-semibold">
+              Updating <Loader className="animate-spin h-10 w-10" />
+            </div>
+          ) : (
+            "Update"
+          )}
         </Button>
       </form>
     </Form>

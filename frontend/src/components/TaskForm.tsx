@@ -19,11 +19,11 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { TaskValidation } from "@/lib/validation";
+import { useCreateOrUpdateTask } from "@/react-query/task";
 import { TaskType, UserType } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -43,7 +43,7 @@ const statusOptions = ["Todo", "In Progress", "Completed"];
 const priorityOptions = ["Low", "Medium", "High"];
 
 const TaskForm = ({
-  type,
+  type = "create",
   task,
   setToggleForm,
   currentUser,
@@ -54,7 +54,6 @@ const TaskForm = ({
   currentUser: UserType;
 }) => {
   const [assignedToUsers, setAssignedToUsers] = useState([]);
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     async function getUsers() {
@@ -91,54 +90,21 @@ const TaskForm = ({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof TaskValidation>) {
-    try {
-      const payload = {
-        ...values,
-        assignedTo: values.assignedTo === "" ? undefined : values.assignedTo,
-      };
-      const token = localStorage.getItem("userToken");
+  const { createOrUpdateTask, isPending } = useCreateOrUpdateTask(
+    task?._id || "",
+    setToggleForm,
+    type
+  );
 
-      if (type === "edit") {
-        const response = await axios.put(
-          `${BACKEND_URL}/task/update/${task?._id}`,
-          payload,
-          {
-            withCredentials: true,
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+  function onSubmit(values: z.infer<typeof TaskValidation>) {
+    const payload = {
+      ...values,
+      assignedTo: values.assignedTo === "" ? undefined : values.assignedTo,
+    };
 
-        if (response.data.success) {
-          toast.success(response.data.message);
-          queryClient.invalidateQueries({ queryKey: ["all-tasks"] });
-          setToggleForm(false);
-        }
-      } else {
-        const response = await axios.post(
-          `${BACKEND_URL}/task/create`,
-          payload,
-          {
-            withCredentials: true,
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (response.data.success) {
-          toast.success(response.data.message);
-          queryClient.invalidateQueries({ queryKey: ["all-tasks"] });
-          setToggleForm(false);
-        }
-      }
-    } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message ||
-          `Something went wrong ${
-            type === "edit" ? "editing" : "creating"
-          } task, Please try again later`
-      );
-    }
+    createOrUpdateTask({ payload, type });
   }
+
   return (
     <Form {...form}>
       <form
@@ -361,7 +327,14 @@ const TaskForm = ({
           type="submit"
           className="mt-3 bg-blue-600 hover:bg-blue-700 cursor-pointer"
         >
-          {type === "edit" ? "Update" : "Create Task"}
+          {isPending ? (
+            <div className="flex items-center gap-2 font-semibold">
+              {type === "edit" ? "Updating" : "Creating"}
+              <Loader className="animate-spin h-10 w-10" />
+            </div>
+          ) : (
+            <>{type === "edit" ? "Update" : "Create Task"}</>
+          )}
         </Button>
       </form>
     </Form>

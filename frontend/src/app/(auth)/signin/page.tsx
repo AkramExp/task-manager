@@ -11,15 +11,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { SigninValidation } from "@/lib/validation";
+import { useSignin } from "@/react-query/user";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import { Loader } from "lucide-react";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
-import { BACKEND_URL } from "../../../../config";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const SignIn = () => {
   const router = useRouter();
@@ -32,27 +30,10 @@ const SignIn = () => {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof SigninValidation>) {
-    try {
-      const response = await axios.post(`${BACKEND_URL}/user/login`, values);
+  const { signinUser, isPending } = useSignin();
 
-      if (response.data.success) {
-        toast.success("Logged in successfully");
-
-        localStorage.setItem("userToken", response.data.token);
-        Cookies.set("userToken", response.data.token, {
-          expires: 7,
-          path: "/",
-        });
-
-        router.push("/dashboard");
-      }
-    } catch (error: any) {
-      toast.error(
-        error.response.data.message ||
-          "Something went wrong while login, Please try again later"
-      );
-    }
+  function onSubmit(values: z.infer<typeof SigninValidation>) {
+    signinUser(values);
   }
 
   return (
@@ -112,7 +93,13 @@ const SignIn = () => {
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors cursor-pointer"
               >
-                Login
+                {isPending ? (
+                  <div className="flex items-center gap-2 font-semibold">
+                    Logging in <Loader className="animate-spin h-10 w-10" />
+                  </div>
+                ) : (
+                  "Login"
+                )}
               </Button>
             </div>
           </form>

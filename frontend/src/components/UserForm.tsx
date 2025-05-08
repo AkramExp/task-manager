@@ -11,15 +11,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UserValidation } from "@/lib/validation";
+import { useUpdateProfile } from "@/react-query/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { Loader } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
-import { BACKEND_URL } from "../../config";
-import { useCurrentUser } from "@/react-query/user";
 
 const UserForm = ({ user }: { user: any }) => {
   const queryClient = useQueryClient();
@@ -32,29 +29,10 @@ const UserForm = ({ user }: { user: any }) => {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof UserValidation>) {
-    try {
-      const response = await axios.put(
-        `${BACKEND_URL}/user/update-profile`,
-        values,
-        {
-          withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
-        }
-      );
+  const { updateProfile, isPending } = useUpdateProfile();
 
-      if (response.data.success) {
-        toast.success(response.data.message);
-        queryClient.invalidateQueries({ queryKey: ["current-user"] });
-      }
-    } catch (error: any) {
-      toast.error(
-        error.response.data.message ||
-          "Something went wrong updating, Please try again later"
-      );
-    }
+  function onSubmit(values: z.infer<typeof UserValidation>) {
+    updateProfile(values);
   }
 
   return (
@@ -115,7 +93,13 @@ const UserForm = ({ user }: { user: any }) => {
             type="submit"
             className="w-full py-2 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-medium rounded-md shadow-md transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
           >
-            Update Profile
+            {isPending ? (
+              <div className="flex items-center gap-2 font-semibold">
+                Updating <Loader className="animate-spin h-10 w-10" />
+              </div>
+            ) : (
+              "Update Profile"
+            )}
           </Button>
         </form>
       </Form>
