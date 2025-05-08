@@ -212,6 +212,7 @@ export const getUserTasks = async (req, res) => {
 
     const statusCondition =
       status && status !== "all" ? { status: status } : {};
+
     const priorityCondition =
       priority && priority !== "all" ? { priority: priority } : {};
 
@@ -235,7 +236,9 @@ export const getUserTasks = async (req, res) => {
     if (sort === "dueDate") {
       sortCondition = { dueDate: -1 };
     } else if (sort === "priority") {
-      sortCondition = { priority: -1 };
+      sortCondition = {
+        priorityOrder: 1,
+      };
     } else if (sort === "status") {
       sortCondition = { status: -1 };
     } else {
@@ -293,6 +296,20 @@ export const getUserTasks = async (req, res) => {
         $addFields: {
           assignedTo: {
             $first: "$assignedTo",
+          },
+        },
+      },
+      {
+        $addFields: {
+          priorityOrder: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$priority", "High"] }, then: 1 },
+                { case: { $eq: ["$priority", "Medium"] }, then: 2 },
+                { case: { $eq: ["$priority", "Low"] }, then: 3 },
+              ],
+              default: 4,
+            },
           },
         },
       },
