@@ -1,6 +1,6 @@
 # TaskFlow
 
-TaskFlow is a collaborative task management website designed to help teams efficiently assign, track, and manage tasks. Streamline your workflow and enhance productivity with seamless task delegation and progress monitoring
+TaskFlow is a collaborative task management website designed to help teams efficiently assign, track, and manage tasks. Streamline your workflow and enhance productivity with seamless task delegation and progress monitoring.
 
 ![s1](https://github.com/AkramExp/task-manager/blob/main/frontend/public/screenshot.png)
 
@@ -8,20 +8,18 @@ TaskFlow is a collaborative task management website designed to help teams effic
 
 ## Features
 
-TaskFlow provides user a bunch of features in the website which are listed below
-
-- **Account registration and login functionality for authenticated access**
-- **Ability to create tasks with a title, description, due date, priority, status, and assign them to other users**
-- **Edit and delete existing tasks with appropriate access control**
-- **Assigned users can update the status of tasks they are responsible for**
-- **Profile management allowing users to update their personal information**
-- **Search functionality to locate tasks by title or description**
-- **Advanced filtering options for tasks based on priority, status, due date, creator, or assignee**
-- **View of tasks assigned by others for better task tracking and accountability**
-- **Sorting of tasks by status, priority, creation date, or due date for organized viewing**
-- **Notifications for task creation, updates, deletions, and status changes**
-- **Paginated task listings to support large datasets efficiently**
-- **Fully responsive UI optimized for desktop, tablet, and mobile devices**
+- Account registration and login functionality for authenticated access
+- Ability to create tasks with a title, description, due date, priority, status, and assign them to other users
+- Edit and delete existing tasks with appropriate access control
+- Assigned users can update the status of tasks they are responsible for
+- Profile management allowing users to update their personal information
+- Search functionality to locate tasks by title or description
+- Advanced filtering options for tasks based on priority, status, due date, creator, or assignee
+- View of tasks assigned by others for better task tracking and accountability
+- Sorting of tasks by status, priority, creation date, or due date for organized viewing
+- Notifications for task creation, updates, deletions, and status changes
+- Paginated task listings to support large datasets efficiently
+- Fully responsive UI optimized for desktop, tablet, and mobile devices
 
 ## Approach
 
