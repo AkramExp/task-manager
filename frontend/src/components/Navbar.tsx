@@ -12,7 +12,9 @@ const Navbar = () => {
         </Link>
         <div className="flex items-center gap-2">
           <Link href="/user">
-            <User className="mr-2" />
+            <div className="border-white border-2 mr-2 rounded-full p-1">
+              <User className="w-5 h-5" />
+            </div>
           </Link>
           <Notifications />
           <LogoutButton />
