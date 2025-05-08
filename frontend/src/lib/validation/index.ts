@@ -29,3 +29,8 @@ export const TaskValidation = z.object({
 export const StatusValidation = z.object({
   status: z.string(),
 });
+
+export const UserValidation = z.object({
+  name: z.string(),
+  email: z.string().email(),
+});
