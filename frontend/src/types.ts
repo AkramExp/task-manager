@@ -17,3 +17,9 @@ export interface TaskType {
   createdBy?: { _id: string; name: string; email: string };
   createdAt?: string;
 }
+
+export interface UserType {
+  _id: string;
+  name: string;
+  email: string;
+}
