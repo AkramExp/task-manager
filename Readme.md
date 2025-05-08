@@ -40,8 +40,9 @@ TaskFlow addresses these challenges by offering a minimalist yet powerful task m
 #### Frontend:
 
 - Developed using **Next.js** and **React.js**, providing a dynamic, server-side rendered (SSR) application for fast loading and better SEO.
-- **Tailwind CSS** was used for styling, allowing for a highly customizable, utility-first approach to responsive design.
-- **React Query** handled all data fetching and caching, ensuring that the application can efficiently manage data and optimize API calls.
+- Styled with **Tailwind CSS** in combination with **ShadCN/UI** for a clean, accessible, and consistent design system.
+- Utilized **React Query** for efficient data fetching, caching, and state synchronization.
+- Form validation and schema enforcement implemented with **Zod**, integrated seamlessly into form handling logic.
 
 #### Backend:
 
