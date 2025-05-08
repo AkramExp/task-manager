@@ -2,8 +2,8 @@
 
 import { useTasks } from "@/react-query/task";
 import { Loader, SearchX } from "lucide-react";
-import TaskCard from "./TaskCard";
 import Pagination from "./Pagination";
+import TaskCard from "./TaskCard";
 
 const TasksList = () => {
   const { allTasks, isLoading } = useTasks();
