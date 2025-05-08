@@ -128,10 +128,26 @@ export const updateTask = async (req, res) => {
 
     const taskUser = await User.findById(userId);
 
-    await Notification.create({
-      userId: assignedTo,
-      message: `${taskUser.name} (${taskUser.email}) has updated the task "${updatedTask.title}"`,
-    });
+    console.log(updatedTask, findTask);
+
+    if (String(findTask.assignedTo) !== String(updatedTask.assignedTo)) {
+      console.log("helllo");
+
+      await Notification.create({
+        userId: updatedTask.assignedTo,
+        message: `${taskUser.name} (${taskUser.email}) has assigned the task "${updatedTask.title}"`,
+      });
+
+      await Notification.create({
+        userId: findTask.assignedTo,
+        message: `${taskUser.name} (${taskUser.email}) has assigned the task "${updatedTask.title}" to someone else`,
+      });
+    } else {
+      await Notification.create({
+        userId: updatedTask.assignedTo,
+        message: `${taskUser.name} (${taskUser.email}) has updated the task "${updatedTask.title}"`,
+      });
+    }
 
     return res
       .status(200)
@@ -163,7 +179,7 @@ export const updateStatus = async (req, res) => {
 
     await Notification.create({
       userId: findTask.createdBy,
-      message: `${assignedUser.name}-${assignedUser.email} has updated the status of the task "${findTask.title}"`,
+      message: `${assignedUser.name} (${assignedUser.email}) has updated the status of the task "${findTask.title}"`,
     });
 
     return res
